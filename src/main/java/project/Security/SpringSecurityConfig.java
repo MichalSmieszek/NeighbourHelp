@@ -26,7 +26,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/userToHouse/*").authenticated()
                 .antMatchers("/user/*").permitAll()
                 .antMatchers("/house/*").authenticated()
-                .antMatchers("/problem/*").authenticated()
+                .antMatchers("/problem/*").permitAll()
                 .and().httpBasic();
         //.authenticationEntryPoint(authEntryPoint);
     }

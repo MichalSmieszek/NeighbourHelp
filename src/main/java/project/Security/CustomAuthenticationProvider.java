@@ -36,11 +36,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
 
         // logger.debug(login + " " + password);
-        System.out.println("Login " + login);
-        System.out.println("Password " + password);
+        //System.out.println("Login " + login);
+        //System.out.println("Password " + password);
 
-        User user = userRepository.findByName(login);
-        System.out.println ("password "+user.getPassword());
+        User user = userRepository.findFirstByName(login);
+       // System.out.println ("password "+user.getPassword());
         final List<GrantedAuthority> grantedAuths = new ArrayList<>();
         if (user == null) {
             return null;

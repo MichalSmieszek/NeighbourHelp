@@ -16,10 +16,7 @@ import project.Repository.UserToHouseRepository;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 @RequestMapping(path="/problem")
@@ -35,20 +32,24 @@ public class ProblemController {
 
     @CrossOrigin
     @ResponseBody
-    @PostMapping(value = "/addToOneHouse")
-    public String addToOneHouse (Problem newProblem){
+    @GetMapping(value = "/addToOneHouse")
+    public String addToOneHouse (@RequestParam String name,
+                                 @RequestParam int danger,
+                                 @RequestParam String description,
+                                 @RequestParam String userName){
         try {
             Problem problem = new Problem();
-            problem.setHouse(newProblem.getHouse());
-            problem.setDanger(newProblem.getDanger());
-            problem.setDescription(newProblem.getDescription());
-            problem.setApplicant(newProblem.getApplicant());
+            //System.out.println(userRepository.findByName(userName).getId());
+            problem.setHouse(houseRepository.findFirstByName(name).getId());
+            problem.setDanger(danger);
+            problem.setDescription(description);
+            problem.setApplicant(userRepository.findFirstByName(userName).getId());
             problemRepository.save(problem);
-            if (newProblem.getDanger()==1){
+            if (danger==1){
                 Set <UserToHouse> userToHouses = new HashSet<>();
-                userToHouses=userToHouseRepository.findAllByHouse(newProblem.getHouse());
+                userToHouses=userToHouseRepository.findAllByHouse(houseRepository.findByName(name).getId());
                 for (UserToHouse userToHouse: userToHouses)
-                    sendEmail(userToHouse.getUser(),newProblem.getApplicant(),newProblem.getDescription());
+                    sendEmail(userToHouse.getUser(),userRepository.findFirstByName(userName).getId(),description);
             }
 
             return ("Added.");
@@ -59,18 +60,27 @@ public class ProblemController {
 
     @CrossOrigin
     @ResponseBody
-    @PostMapping(value = "/addToAll")
-    public String addToAll (Problem newProblem){
+    @GetMapping(value = "/addToAll")
+    public String addToAll (@RequestParam int danger,
+                            @RequestParam String description,
+                            @RequestParam String userName){
         try {
-            Problem problem = new Problem();
-            problem.setDanger(newProblem.getDanger());
-            problem.setDescription(newProblem.getDescription());
-            problem.setApplicant(newProblem.getApplicant());
             Set <House> houses = new HashSet<>();
             houses = houseRepository.findAll();
             for (House house : houses) {
+                Problem problem = new Problem();
+                problem.setDanger(danger);
+                problem.setDescription(description);
+                problem.setApplicant(userRepository.findFirstByName(userName).getId());
                 problem.setHouse(house.getId());
                 problemRepository.save(problem);
+            }
+            if(danger==1) {
+                List<User> users = new LinkedList<>();
+                users = userRepository.findAll();
+
+                for (User user : users)
+                    sendEmail(user.getId(), userRepository.findFirstByName(userName).getId(), description);
             }
             return ("Added.");
 
@@ -82,9 +92,12 @@ public class ProblemController {
     @CrossOrigin
     @ResponseBody
     @GetMapping(value="/all")
-    public List<Problem> show (House house){
-        return(problemRepository.findAllByHouse(house.getId()));
+    public List<Problem> show (@RequestParam String houseName){
+
+        int houseId = houseRepository.findByName(houseName).getId();
+        return(problemRepository.findAllByHouse(houseId));
     }
+
     public String sendEmail(int newUser, int newApplicant,String messageText) {
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", "true");
@@ -103,7 +116,7 @@ public class ProblemController {
         final String password = "asd1fgh2jkl3";
         final String fromEmail = "safetyhouseapplication@gmail.com";
         final String toEmail = user.getEmail();
-        final String subject = "Danger at home";
+        final String subject = "New information";
         final String text = greetings+ "\n" + "user called " + applicant.getName() + " has already reported " +messageText+
                 ".  \nWith regards, \nAdministration of Safety Home." ;
         Session session = Session.getDefaultInstance(prop, new Authenticator() {
