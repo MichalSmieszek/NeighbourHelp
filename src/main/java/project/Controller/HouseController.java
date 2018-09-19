@@ -27,12 +27,18 @@ public class HouseController {
     UserToHouseRepository userToHouseRepository;
 
     @CrossOrigin
-    @PostMapping(value ="/add")
-    public String add (@RequestBody House newHouse){
+    @ResponseBody
+    @GetMapping(value ="/add")
+    public String add (@RequestParam String name){
         try {
             House house = new House();
-            house.setName(newHouse.getName());
-            return ("House is added");
+            if(houseRepository.findFirstByName(name)!=null)
+                return("There is house with the same name.");
+            else {
+                house.setName(name);
+                houseRepository.save(house);
+                return ("House is added");
+            }
         }catch(Exception e){
             return ("Unknown error");
         }
@@ -41,10 +47,10 @@ public class HouseController {
     @CrossOrigin
     @ResponseBody
     @GetMapping(value="/showUsers")
-    public Set<User> showUsers(@RequestParam House newHouse) {
+    public Set<User> showUsers(@RequestParam String name) {
         Set<User> users  = new HashSet<>();
         try{
-            House house = houseRepository.findById(newHouse.getId());
+            House house = houseRepository.findByName(name);
             Set <UserToHouse> userToHouses = userToHouseRepository.findAllByHouse(house.getId());
             for(UserToHouse userToHouse :userToHouses)
             users.add(userRepository.findById(userToHouse.getUser()));
@@ -56,9 +62,9 @@ public class HouseController {
     @CrossOrigin
     @ResponseBody
     @DeleteMapping(value="/delete")
-    public String delete (House oldHouse){
+    public String delete (String name){
         try {
-            House house = houseRepository.findById(oldHouse.getId());
+            House house = houseRepository.findByName(name);
             houseRepository.delete(house);
             return("House deleted.");
         }catch(Exception e){
