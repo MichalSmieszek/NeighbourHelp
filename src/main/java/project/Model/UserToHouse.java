@@ -12,6 +12,7 @@ public class UserToHouse {
     int house;
 
     public int getUser() {
+
         return user;
     }
 

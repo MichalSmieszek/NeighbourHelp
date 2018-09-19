@@ -5,10 +5,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import project.Model.User;
+import project.Model.UserToHouse;
 import project.Repository.UserRepository;
+import project.Repository.UserToHouseRepository;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping(path="/user")
@@ -17,6 +21,8 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserToHouseRepository userToHouseRepository;
 
     @CrossOrigin
     @GetMapping(path="/add")
@@ -56,9 +62,15 @@ public class UserController {
     @DeleteMapping(value = "/delete")
     public String deleteUser(@RequestParam User oldUser){
         User user = userRepository.findById(oldUser.getId());
+        Set<UserToHouse> usersToHouse =new HashSet<>();
+        usersToHouse = userToHouseRepository.findAllByUser(user.getId());
         userRepository.delete(user);
+        for (UserToHouse userToHouse : usersToHouse){
+            userToHouseRepository.delete(userToHouse);
+        }
         return("User deleted");
     }
+
     @CrossOrigin
     @ResponseBody
     @GetMapping(value = "/all")

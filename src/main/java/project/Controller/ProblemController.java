@@ -3,6 +3,7 @@ package project.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import project.Model.Problem;
 import project.Model.House;
 import project.Model.User;
@@ -31,7 +32,9 @@ public class ProblemController {
     UserRepository userRepository;
     @Autowired
     UserToHouseRepository userToHouseRepository;
+
     @CrossOrigin
+    @ResponseBody
     @PostMapping(value = "/addToOneHouse")
     public String addToOneHouse (Problem newProblem){
         try {
@@ -53,7 +56,9 @@ public class ProblemController {
             return("Unknown error");
         }
     }
+
     @CrossOrigin
+    @ResponseBody
     @PostMapping(value = "/addToAll")
     public String addToAll (Problem newProblem){
         try {
@@ -73,13 +78,13 @@ public class ProblemController {
             return("Unknown error");
         }
     }
+
     @CrossOrigin
+    @ResponseBody
     @GetMapping(value="/all")
     public List<Problem> show (House house){
         return(problemRepository.findAllByHouse(house.getId()));
     }
-
-
     public String sendEmail(int newUser, int newApplicant,String messageText) {
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", "true");
@@ -117,8 +122,6 @@ public class ProblemController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         return("Mail has been sent.");
     }
 

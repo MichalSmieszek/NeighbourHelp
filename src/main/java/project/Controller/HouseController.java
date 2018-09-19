@@ -3,6 +3,7 @@ package project.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import project.Model.House;
 import project.Model.User;
 import project.Model.UserToHouse;
@@ -53,6 +54,7 @@ public class HouseController {
       return(users)  ;
     }
     @CrossOrigin
+    @ResponseBody
     @DeleteMapping(value="/delete")
     public String delete (House oldHouse){
         try {
